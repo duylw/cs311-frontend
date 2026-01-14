@@ -8,9 +8,9 @@ A modern React-based web application for chatting with research papers using AI.
 
 | Name | Student ID |
 |------|-----------|
-| Member 1 | 21XXXXXX |
-| Member 2 | 21XXXXXX |
-| Member 3 | 21XXXXXX |
+| Lương Quang Duy | 23520368 |
+| Hồ Phương Tây | 23521408 |
+| Lê Trung Nhân | 20520666 |
 
 ## Features
 
