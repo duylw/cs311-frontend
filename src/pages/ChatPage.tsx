@@ -128,12 +128,26 @@ const ChatPage = () => {
     }
   };
 
+  const handleDeletePaper = async (paperId: string) => {
+    if (!collectionId) return;
+    
+    try {
+      await papersApi.deletePaper(collectionId, paperId);
+      // Reload papers to reflect the deletion
+      loadPapers(collectionId);
+    } catch (error) {
+      console.error('Failed to delete paper:', error);
+      throw error; // Re-throw to let the sidebar handle it
+    }
+  };
+
   return (
     <div className="flex h-screen bg-gray-900 overflow-hidden">
       {isPapersSidebarOpen && (
         <PapersSidebar
           papers={papers}
           onAddPaper={handleSearchPapers}
+          onDeletePaper={handleDeletePaper}
           onClose={() => setIsPapersSidebarOpen(false)}
         />
       )}

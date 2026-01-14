@@ -5,15 +5,35 @@ import AddPaperModal from './AddPaperModal';
 interface PapersSidebarProps {
   papers: Paper[];
   onAddPaper: (query: string) => Promise<void>;
+  onDeletePaper: (paperId: string) => Promise<void>;
   onClose: () => void;
 }
 
-const PapersSidebar = ({ papers, onAddPaper, onClose }: PapersSidebarProps) => {
+const PapersSidebar = ({ papers, onAddPaper, onDeletePaper, onClose }: PapersSidebarProps) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [deletingPaperId, setDeletingPaperId] = useState<string | null>(null);
 
   const handlePaperClick = (paper: Paper) => {
     if (paper.pdf_url) {
       window.open(paper.pdf_url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleDelete = async (e: React.MouseEvent, paperId: string) => {
+    e.stopPropagation(); // Prevent opening the paper when clicking delete
+    
+    if (!confirm('Are you sure you want to delete this paper?')) {
+      return;
+    }
+
+    setDeletingPaperId(paperId);
+    try {
+      await onDeletePaper(paperId);
+    } catch (error) {
+      console.error('Failed to delete paper:', error);
+      alert('Failed to delete paper. Please try again.');
+    } finally {
+      setDeletingPaperId(null);
     }
   };
 
@@ -65,35 +85,51 @@ const PapersSidebar = ({ papers, onAddPaper, onClose }: PapersSidebarProps) => {
               {papers.map((paper) => (
                 <div
                   key={paper.id}
-                  onClick={() => handlePaperClick(paper)}
-                  className={`p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-all border border-gray-600 group ${
+                  className={`p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-all border border-gray-600 group relative ${
                     paper.pdf_url ? 'cursor-pointer hover:border-indigo-500' : 'cursor-default'
-                  }`}
-                  title={paper.pdf_url ? 'Click to open paper' : 'No URL available'}
+                  } ${deletingPaperId === paper.id ? 'opacity-50' : ''}`}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-medium text-sm text-white mb-1 line-clamp-2 flex-1">
-                      {paper.title}
-                    </h3>
-                    {paper.url && (
-                      <svg 
-                        className="w-4 h-4 text-gray-400 group-hover:text-indigo-400 transition-colors flex-shrink-0 mt-0.5" 
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
+                  <div onClick={() => handlePaperClick(paper)}>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-medium text-sm text-white mb-1 line-clamp-2 flex-1 pr-6">
+                        {paper.title}
+                      </h3>
+                      {paper.url && (
+                        <svg 
+                          className="w-4 h-4 text-gray-400 group-hover:text-indigo-400 transition-colors flex-shrink-0 mt-0.5" 
+                          fill="none" 
+                          viewBox="0 0 24 24" 
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      )}
+                    </div>
+                    {paper.authors && paper.authors.length > 0 && (
+                      <p className="text-xs text-gray-400 mb-1">
+                        {paper.authors.join(', ')}
+                      </p>
+                    )}
+                    {paper.year && (
+                      <p className="text-xs text-gray-500">{paper.year}</p>
                     )}
                   </div>
-                  {paper.authors && paper.authors.length > 0 && (
-                    <p className="text-xs text-gray-400 mb-1">
-                      {paper.authors.join(', ')}
-                    </p>
-                  )}
-                  {paper.year && (
-                    <p className="text-xs text-gray-500">{paper.year}</p>
-                  )}
+                  
+                  {/* Delete Button */}
+                  <button
+                    onClick={(e) => handleDelete(e, paper.id)}
+                    disabled={deletingPaperId === paper.id}
+                    className="absolute top-2 right-2 p-1.5 bg-gray-800 hover:bg-red-600 text-gray-400 hover:text-white rounded transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                    title="Delete paper"
+                  >
+                    {deletingPaperId === paper.id ? (
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
               ))}
             </div>
