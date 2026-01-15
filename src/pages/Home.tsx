@@ -161,11 +161,6 @@ const Home = () => {
                       <h3 className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors duration-200 mb-1">
                         {collection.name}
                       </h3>
-                      {collection.description && (
-                        <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                          {collection.description}
-                        </p>
-                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

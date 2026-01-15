@@ -15,4 +15,7 @@ export const collectionsApi = {
 
   ingestTopic: (id: string, data: { topic: string }) =>
     apiClient.post(`/collections/${id}/ingest-topic`, data),
+
+  update: (id: string, data: { name?: string; description?: string }) =>
+    apiClient.patch<Collection>(`/collections/${id}`, data),
 };

@@ -90,13 +90,13 @@ const ChatMessages = ({ messages, isLoading }: ChatMessagesProps) => {
                 {/* Message bubble */}
                 <div className={`flex-1 max-w-[80%] ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
                   <div
-                    className={`inline-block rounded-2xl px-4 py-3 ${
+                    className={`inline-block rounded-2xl px-6 py-4 ${
                       message.role === 'user'
                         ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
                         : 'bg-gray-800 text-gray-100 border border-gray-700'
                     }`}
                   >
-                    <div className="text-sm leading-relaxed">
+                    <div className="text-base leading-relaxed">
                       {message.role === 'assistant' ? (
                         <ReactMarkdown
                           remarkPlugins={[remarkMath]}
