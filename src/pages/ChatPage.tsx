@@ -45,7 +45,7 @@ const ChatPage = () => {
 
   const loadChatHistory = async (id: string) => {
     try {
-      const data = await collectionsApi.getChatHistory(id);
+      const data = await collectionsApi.getChatHistory(id) as { messages?: any[] };
       
       if (data && data.messages && Array.isArray(data.messages)) {
         // Convert the chat history data to Message format
@@ -107,21 +107,15 @@ const ChatPage = () => {
   };
 
   const handleSearchPapers = async (query: string) => {
+    if (!collectionId) return;
+    
     try {
-      const searchResults = await collectionsApi.ingestTopic(collectionId, { topic: query });
-      
-      // Add found papers to the collection
-      if (collectionId && searchResults && searchResults.length > 0) {
-        for (const paper of searchResults) {
-          await papersApi.addToCollection(collectionId, {
-            title: paper.title,
-            url: paper.url,
-            content: paper.content,
-          });
-        }
-        // Reload papers to show the newly added ones
-        loadPapers(collectionId);
+      // Search
+      if (collectionId) {
+         await collectionsApi.ingestTopic(collectionId, { topic: query });
       }
+      // Reload papers to show the newly added ones
+      loadPapers(collectionId);
     } catch (error) {
       console.error('Failed to search papers:', error);
       throw error; // Re-throw to let the modal handle it

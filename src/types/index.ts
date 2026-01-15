@@ -14,7 +14,16 @@ export interface Collection {
   description?: string;
   created_at: string;
   updated_at?: string;
-  paper_count?: number;
+  total_papers?: number;
+}
+
+export interface IngestTopicResponse {
+  collection_id: number;
+  topic: string;
+  queries?: Record<string, any>[];
+  abstract_hits?: any[];
+  unique_papers?: number;
+  status: string;
 }
 
 export interface Message {

@@ -94,7 +94,7 @@ const PapersSidebar = ({ papers, onAddPaper, onDeletePaper, onClose }: PapersSid
                       <h3 className="font-medium text-sm text-white mb-1 line-clamp-2 flex-1 pr-6">
                         {paper.title}
                       </h3>
-                      {paper.url && (
+                      {paper.pdf_url && (
                         <svg 
                           className="w-4 h-4 text-gray-400 group-hover:text-indigo-400 transition-colors flex-shrink-0 mt-0.5" 
                           fill="none" 
