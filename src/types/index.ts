@@ -14,7 +14,7 @@ export interface Collection {
   description?: string;
   created_at: string;
   updated_at?: string;
-  paper_count?: number;
+  total_papers?: number;
 }
 
 export interface Message {

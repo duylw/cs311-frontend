@@ -45,7 +45,7 @@ const ChatPage = () => {
 
   const loadChatHistory = async (id: string) => {
     try {
-      const data = await collectionsApi.getChatHistory(id);
+      const data = await collectionsApi.getChatHistory(id) as { messages?: any[] };
       
       if (data && data.messages && Array.isArray(data.messages)) {
         // Convert the chat history data to Message format
@@ -107,6 +107,8 @@ const ChatPage = () => {
   };
 
   const handleSearchPapers = async (query: string) => {
+    if (!collectionId) return;
+    
     try {
       const searchResults = await collectionsApi.ingestTopic(collectionId, { topic: query });
       
