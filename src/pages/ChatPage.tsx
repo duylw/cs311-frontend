@@ -110,20 +110,12 @@ const ChatPage = () => {
     if (!collectionId) return;
     
     try {
-      const searchResults = await collectionsApi.ingestTopic(collectionId, { topic: query });
-      
-      // Add found papers to the collection
-      if (collectionId && searchResults && searchResults.length > 0) {
-        for (const paper of searchResults) {
-          await papersApi.addToCollection(collectionId, {
-            title: paper.title,
-            url: paper.url,
-            content: paper.content,
-          });
-        }
-        // Reload papers to show the newly added ones
-        loadPapers(collectionId);
+      // Search
+      if (collectionId) {
+         await collectionsApi.ingestTopic(collectionId, { topic: query });
       }
+      // Reload papers to show the newly added ones
+      loadPapers(collectionId);
     } catch (error) {
       console.error('Failed to search papers:', error);
       throw error; // Re-throw to let the modal handle it
