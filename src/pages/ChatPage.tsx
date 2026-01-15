@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import ChatMessages from '../components/ChatMessages';
 import ChatInput from '../components/ChatInput';
 import PapersSidebar from '../components/PapersSidebar';
@@ -10,12 +10,15 @@ import { queriesApi } from '../api/queries';
 
 const ChatPage = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
+  const navigate = useNavigate();
   
   const [currentCollection, setCurrentCollection] = useState<Collection | null>(null);
   const [papers, setPapers] = useState<Paper[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isPapersSidebarOpen, setIsPapersSidebarOpen] = useState(true);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState('');
 
   useEffect(() => {
     if (collectionId) {
@@ -29,6 +32,7 @@ const ChatPage = () => {
     try {
       const data = await collectionsApi.getById(id);
       setCurrentCollection(data);
+      setEditedName(data.name);
     } catch (error) {
       console.error('Failed to load collection:', error);
     }
@@ -135,6 +139,35 @@ const ChatPage = () => {
     }
   };
 
+  const handleStartEdit = () => {
+    setIsEditingName(true);
+  };
+
+  const handleSaveName = async () => {
+    if (!collectionId || !editedName.trim()) return;
+
+    try {
+      await collectionsApi.update(collectionId, { name: editedName.trim() });
+      setCurrentCollection(prev => prev ? { ...prev, name: editedName.trim() } : null);
+      setIsEditingName(false);
+    } catch (error) {
+      console.error('Failed to update collection name:', error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditedName(currentCollection?.name || '');
+    setIsEditingName(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSaveName();
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
+    }
+  };
+
   return (
     <div className="flex h-screen bg-gray-900 overflow-hidden">
       {isPapersSidebarOpen && (
@@ -149,6 +182,17 @@ const ChatPage = () => {
         {/* Header - Fixed */}
         <div className="flex items-center justify-between px-6 py-4 bg-gray-800 border-b border-gray-700 flex-shrink-0">
           <div className="flex items-center gap-3">
+            {/* Back Button */}
+            <button
+              onClick={() => navigate('/')}
+              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+              title="Go back"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
             {!isPapersSidebarOpen && (
               <button
                 onClick={() => setIsPapersSidebarOpen(true)}
@@ -163,9 +207,51 @@ const ChatPage = () => {
               </button>
             )}
 
-            <h1 className="text-xl font-semibold text-white">
-              {currentCollection?.name || 'Chat'}
-            </h1>
+            {isEditingName ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                  autoFocus
+                />
+                <button
+                  onClick={handleSaveName}
+                  className="p-1.5 text-green-400 hover:text-green-300 hover:bg-gray-700 rounded"
+                  title="Save"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  className="p-1.5 text-red-400 hover:text-red-300 hover:bg-gray-700 rounded"
+                  title="Cancel"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-semibold text-white">
+                  {currentCollection?.name || 'Chat'}
+                </h1>
+                <button
+                  onClick={handleStartEdit}
+                  className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
+                  title="Rename collection"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
